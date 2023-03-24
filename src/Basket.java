@@ -2,11 +2,13 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Basket {
+public class Basket implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     protected int[] prices;
     protected String[] products;
     protected int sumProducts;
-    Map<String, Integer> map;
+    protected Map<String, Integer> map;
 
     protected Basket(int[] prices, String[] products) {
         this.prices = prices;
@@ -14,32 +16,41 @@ public class Basket {
         map = new HashMap<>();
     }
 
-
     protected void addToCart(int productNum, int amount) {//добавление в корзину
         String k = products[productNum];
         if (map.isEmpty()) {
             map.put(products[productNum], amount);
         } else if (map.containsKey(k)) {
             int v = map.get(k) + amount;
-            map.put(products[productNum], v);
+            if (v <= 0) {
+                v = 0;
+                map.remove(k);
+            } else {
+                map.put(products[productNum], v);
+            }
         } else {
             map.put(products[productNum], amount);
         }
     }
 
     protected void printCart() {//вывод корзины
+        String[] output = new String[products.length];
         System.out.println("  <<<<<  Ваша корзина:  >>>>>");
-
         for (String k : map.keySet()) {
             int v = map.get(k);
             for (int j = 0; j < products.length; j++) {
                 if (k.equals(products[j])) {
-                    System.out.printf(
-                            "%s  %dшт  %d руб/шт  %d руб в сумме\n",
-                            k, v, prices[j], prices[j] * v);
-                    sumProducts += (prices[j] * v);
+                    output[j] = k;
                     break;
                 }
+            }
+        }
+        for (int i = 0; i < output.length; i++) {
+            if (output[i] != null) {
+                System.out.printf(
+                        (i + 1) + ".  %s  %dшт  %d руб/шт  %d руб в сумме\n",
+                        output[i], map.get(output[i]), prices[i], prices[i] * map.get(output[i]));
+                sumProducts += (prices[i] * map.get(output[i]));
             }
         }
         System.out.println("Итого " + sumProducts + " руб.");
@@ -48,35 +59,29 @@ public class Basket {
 
     }
 
-    protected void saveTxt(File textFile) throws IOException {
-        try (PrintWriter out = new PrintWriter(textFile);) {
-            for (Map.Entry<String, Integer> kv : map.entrySet()) {
-                String text = kv.getKey() + " " + kv.getValue();
-                out.write(text);
-                out.write("\n");
-                out.flush();
-            }
-        }
-    }
-
-    protected static Map<String, Integer> loadFromTxtFile(String textFile) {
-        String s1 = "";
-        try (BufferedReader br = new BufferedReader(new FileReader("basket.txt"))) {
-            //чтение построчно
-            String s;
-            Map<String, Integer> map1 = new HashMap<>();
-            while ((s = br.readLine()) != null) {
-                String[] parts = s.split(" ");
-                String product = parts[0];
-                int count = Integer.parseInt(parts[1]);
-                map1.put(product, count);
-
-            }
-            return map1;
-        } catch (IOException ex) {
+    protected void saveBin(File file) {
+        try (FileOutputStream fos = new FileOutputStream(file);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            // запишем экземпляр класса в файл
+            oos.writeObject(map);
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+    }//для сохранения в файл в бинарном формат
+
+    protected static Map<String, Integer> loadFromBinFile(File file) {
+        Map<String, Integer> map = null;
+
+// откроем входной поток для чтения файла
+        try (FileInputStream fis = new FileInputStream(file);
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+            // десериализуем объект и скастим его в класс
+            map = (Map<String, Integer>) ois.readObject();
+            return map;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        System.out.println(map);
         return null;
     }
-
 }
