@@ -9,9 +9,9 @@ public class Main {
         int[] prices = {35, 70, 50, 10, 80};
         Basket basket = new Basket(prices, products);
         File newFile = new File("basket.bin");
-        newFile.createNewFile();
+       // newFile.createNewFile();
         if (newFile.length() > 0) {
-            basket.map = Basket.loadFromBinFile(newFile);
+            basket = Basket.loadFromBinFile(newFile);
             basket.printCart();
         }
         Scanner scanner = new Scanner(System.in);

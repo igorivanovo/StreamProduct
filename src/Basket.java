@@ -63,25 +63,25 @@ public class Basket implements Serializable {
         try (FileOutputStream fos = new FileOutputStream(file);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             // запишем экземпляр класса в файл
-            oos.writeObject(map);
+            oos.writeObject(this);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }//для сохранения в файл в бинарном формат
 
-    protected static Map<String, Integer> loadFromBinFile(File file) {
-        Map<String, Integer> map = null;
+    protected static Basket loadFromBinFile(File file) {
+        Basket basket = null;
 
 // откроем входной поток для чтения файла
         try (FileInputStream fis = new FileInputStream(file);
              ObjectInputStream ois = new ObjectInputStream(fis)) {
             // десериализуем объект и скастим его в класс
-            map = (Map<String, Integer>) ois.readObject();
-            return map;
+            basket = (Basket) ois.readObject();
+
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-        System.out.println(map);
-        return null;
+
+        return basket;
     }
 }
