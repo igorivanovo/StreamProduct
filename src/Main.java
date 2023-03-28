@@ -10,7 +10,7 @@ public class Main {
         Basket basket = new Basket(prices, products);
         File newFile = new File("basket.txt");
         if (newFile.length() > 0) {
-            basket.map = Basket.loadFromTxtFile("basket.txt");
+            basket = Basket.loadFromTxtFile("basket.txt");
             basket.printCart();
         }
         Scanner scanner = new Scanner(System.in);
